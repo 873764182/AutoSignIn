@@ -1,0 +1,135 @@
+package com.pixel.asi;
+
+import android.app.ActivityManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * Created by Administrator on 2017/11/10 0010.
+ * <p>
+ * 工具集
+ */
+
+public class AppUtil {
+
+    /**
+     * 获取当前日期
+     *
+     * @return yyyy-MM-dd
+     */
+    public static String getDate() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");// 设置日期格式
+        return df.format(new Date());// new Date()为获取当前系统时间
+    }
+
+    /**
+     * 今天是星期几
+     * <p>
+     * Java中: weekday=1，当天是周日；weekday=2，当天是周一；...;weekday=7，当天是周六。
+     *
+     * @return 0.星期日, 1.星期一, 2.星期二, 3.星期三, 4.星期四, 5.星期五, 6.星期六.
+     */
+    public static int getWeek() {
+        Date today = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(today);
+        int weekday = c.get(Calendar.DAY_OF_WEEK);
+        return weekday - 1;
+    }
+
+    /**
+     * 获取现在几点
+     *
+     * @return 当前时间 24小时制
+     */
+    public static int getHour() {
+        Calendar c = Calendar.getInstance();
+        return c.get(Calendar.HOUR_OF_DAY); // Calendar.HOUR 12小时制
+    }
+
+    /**
+     * 获取当前多少分
+     *
+     * @return
+     */
+    public static int getMinute() {
+        Calendar c = Calendar.getInstance();
+        return c.get(Calendar.MINUTE); // Calendar.HOUR 12小时制
+    }
+
+    /**
+     * 查看应用包名.启动要查看的程序,命令行输入：adb shell dumpsys window w |findstr \/ |findstr name=
+     */
+    public static void doStartApplicationWithPackageName(Context context, String packageName) {
+        // 通过包名获取此APP详细信息，包括Activities、services、versioncode、name等等
+        PackageInfo packageinfo = null;
+        try {
+            packageinfo = context.getPackageManager().getPackageInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (packageinfo == null) {
+            return;
+        }
+        // 创建一个类别为CATEGORY_LAUNCHER的该包名的Intent
+        Intent resolveIntent = new Intent(Intent.ACTION_MAIN, null);
+        resolveIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        resolveIntent.setPackage(packageinfo.packageName);
+        // 通过getPackageManager()的queryIntentActivities方法遍历
+        List<ResolveInfo> resolveinfoList = context.getPackageManager().queryIntentActivities(resolveIntent, 0);
+        ResolveInfo resolveinfo = resolveinfoList.iterator().next();
+        if (resolveinfo != null) {
+            // packagename = 参数packname
+            String pn = resolveinfo.activityInfo.packageName;
+            // 这个就是我们要找的该APP的LAUNCHER的Activity[组织形式：packagename.mainActivityname]
+            String className = resolveinfo.activityInfo.name;
+            // LAUNCHER Intent
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            // 设置ComponentName参数1:packagename参数2:MainActivity路径
+            ComponentName cn = new ComponentName(pn, className);
+            intent.setComponent(cn);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
+    }
+
+    /**
+     * 杀死程序进程
+     */
+    public static void killAppProcess() {
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
+    /**
+     * 杀死对应报名的程序进程
+     */
+    public static void killAppProcess(Context context, String packageName) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        manager.killBackgroundProcesses(packageName);
+    }
+
+    /**
+     * 获取当前正在连接的WIFI名称(SSID)
+     * SSID: LX, BSSID: dc:fe:18:f3:d7:1f, MAC: 02:00:00:00:00:00, Supplicant state: COMPLETED, RSSI: -35, Link speed: 72Mbps, Frequency: 2462MHz, Net ID: 0, Metered hint: false, score: 60
+     *
+     * @return SSID
+     */
+    public static String getWifiName(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        return wifiInfo.getSSID();
+    }
+
+}
