@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -28,6 +29,8 @@ public class TimingService extends Service {
 
         // 开始前台
         startForeground(1000, createNotification());
+
+        Toast.makeText(this, "任务启动完成", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -52,6 +55,8 @@ public class TimingService extends Service {
 
         // 停止前台
         stopForeground(true);
+
+        Toast.makeText(this, "任务已经关闭", Toast.LENGTH_SHORT).show();
     }
 
     // 穿件一个通知

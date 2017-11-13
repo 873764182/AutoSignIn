@@ -3,8 +3,9 @@
     package="com.pixel.asi">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- 获取WIFI信息状态的权限 -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- 获取网络状态改变的权限 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <!-- 获取网络状态改变的权限 -->
     <application
         android:name=".AsiApplication"
         android:allowBackup="true"
@@ -13,7 +14,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,10 +22,25 @@
             </intent-filter>
         </activity>
 
+        <!-- 定时服务 -->
         <service
             android:name=".TimingService"
             android:enabled="true"
             android:exported="true" />
+
+        <!-- 辅助服务 -->
+        <service
+            android:name=".SIAncillaryService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility" />
+        </service>
 
     </application>
 

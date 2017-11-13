@@ -1,6 +1,7 @@
 package com.pixel.asi;
 
 import android.content.Context;
+import android.view.accessibility.AccessibilityEvent;
 
 /**
  * Created by Administrator on 2017/11/10 0010.
@@ -17,11 +18,11 @@ public class SignInUtil {
     private static String CHECK_MORNING = "MORNING";
     private static String CHECK_EVENING = "EVENING";
 
-    public static String mKey(){
+    public static String mKey() {
         return CHECK_MORNING + AppUtil.getDate();
     }
 
-    public static String eKey(){
+    public static String eKey() {
         return CHECK_EVENING + AppUtil.getDate();
     }
 
@@ -44,6 +45,8 @@ public class SignInUtil {
 
     /**
      * 执行早上上班打卡操作
+     * <p>
+     * 只需要打开应用即可,具体的签到操作在辅助服务SIAncillaryService中执行.
      */
     public static void doMorning(Context context) {
         AppUtil.doStartApplicationWithPackageName(context, DD_PN);  // 直接打开就可以签到
@@ -51,8 +54,32 @@ public class SignInUtil {
 
     /**
      * 执行晚上下班打卡操作
+     * <p>
+     * 只需要打开应用即可,具体的签到操作在辅助服务SIAncillaryService中执行.
      */
     public static void doEvening(Context context) {
         AppUtil.doStartApplicationWithPackageName(context, DD_PN);  // 直接打开就可以签到
     }
+
+    /**
+     * 打上班卡
+     */
+    public static void signMorning(AccessibilityEvent event) {
+
+    }
+
+    /**
+     * 打下班卡
+     */
+    public static void signEvening(AccessibilityEvent event) {
+        String className = event.getClassName().toString();
+        if (className.equals("com.tencent.mm.ui.LauncherUI")) {
+
+        } else if (className.equals("com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyReceiveUI")) {
+
+        } else if (className.equals("com.tencent.mm.plugin.luckymoney.ui.LuckyMoneyDetailUI")) {
+
+        }
+    }
+
 }
