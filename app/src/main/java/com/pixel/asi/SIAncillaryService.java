@@ -33,8 +33,6 @@ public class SIAncillaryService extends AccessibilityService {
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:  // 类型窗口状态改变
                 eventTypeName = "类型窗口状态改变 主要是Activity的改变"; // TODO 每次 event.getClassName() 会拿到Activity的名称
-
-                SignInUtil.punch(this, event);
                 break;
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:    // 式通知状态改变
                 eventTypeName = "式通知状态改变";
@@ -67,6 +65,9 @@ public class SIAncillaryService extends AccessibilityService {
                 eventTypeName = "没有匹配事件";
         }
         Log.e("SIAncillaryService", "eventType:" + eventType + "\t" + "eventTypeName:" + eventTypeName + "\nClassName:" + event.getClassName());
+
+        SignInUtil.FOREGROUND = true;
+        SignInUtil.punch(this, event);
     }
 
     @Override

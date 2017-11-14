@@ -4,6 +4,7 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -13,6 +14,8 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     private TextView mGoToTime;
@@ -67,10 +70,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    if (mGoToTime.getText().length() <= 2 || mAfterTime.getText().length() <= 2) {
+                        Toast.makeText(MainActivity.this, "请先配置上下班时间", Toast.LENGTH_SHORT).show();
+                        mServiceSwitch.setChecked(false);
+                        return;
+                    }
                     // 保存上下班时间与WIFI名称
-                    ConfigUtil.saveString(MainActivity.this, SignInUtil.GOTO_TIME, mGoToTime.getText().toString().trim());
-                    ConfigUtil.saveString(MainActivity.this, SignInUtil.AFTER_TIME, mAfterTime.getText().toString().trim());
-                    ConfigUtil.saveString(MainActivity.this, SignInUtil.WIFI_SSID, mWifiEdit.getText().toString().trim());
+                    ConfigUtil.saveString(MainActivity.this, SignInUtil.GOTO_TIME, mGoToTime.getText().toString().trim().replace("\"", ""));
+                    ConfigUtil.saveString(MainActivity.this, SignInUtil.AFTER_TIME, mAfterTime.getText().toString().trim().replace("\"", ""));
+                    ConfigUtil.saveString(MainActivity.this, SignInUtil.WIFI_SSID, mWifiEdit.getText().toString().trim().replace("\"", ""));
                     // 启动服务
                     startService(new Intent(MainActivity.this, TimingService.class));
                 } else {
@@ -104,6 +112,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void openDingDing(View view) {
         AppUtil.doStartApplicationWithPackageName(this, SignInUtil.DD_PN);
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                String sss = AppUtil.getLollipopRecentTask(AsiApplication.getContext());
+                Log.e("sss", "前台 " + sss);
+            }
+        }, 2000, 2000);
     }
 
     @Override

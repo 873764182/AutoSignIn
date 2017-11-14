@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -129,6 +130,7 @@ public class AppUtil {
     /**
      * 获取当前正在连接的WIFI名称(SSID)
      * SSID: LX, BSSID: dc:fe:18:f3:d7:1f, MAC: 02:00:00:00:00:00, Supplicant state: COMPLETED, RSSI: -35, Link speed: 72Mbps, Frequency: 2462MHz, Net ID: 0, Metered hint: false, score: 60
+     *
      * @return SSID
      */
     public static String getWifiName(Context context) {
@@ -137,7 +139,10 @@ public class AppUtil {
             return null;
         }
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        return wifiInfo.getSSID();
+        if (wifiInfo == null) {
+            return null;
+        }
+        return wifiInfo.getSSID() != null ? wifiInfo.getSSID().replace("\"", "").trim() : null;
     }
 
     /**
@@ -219,6 +224,33 @@ public class AppUtil {
         dataOutputStream.flush();
         dataOutputStream.close();
         outputStream.close();
+    }
+
+    /**
+     * 获取前台应用包名
+     */
+    public static String getLollipopRecentTask(Context context) {
+        final int PROCESS_STATE_TOP = 2;
+        try {
+            //通过反射获取私有成员变量processState，稍后需要判断该变量的值
+            Field processStateField = ActivityManager.RunningAppProcessInfo.class.getDeclaredField("processState");
+            List<ActivityManager.RunningAppProcessInfo> processes =
+                    ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getRunningAppProcesses();
+            for (ActivityManager.RunningAppProcessInfo process : processes) {
+                //判断进程是否为前台进程
+                if (process.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    int state = processStateField.getInt(process);
+                    //processState值为2
+                    if (state == PROCESS_STATE_TOP) {
+                        String[] packname = process.pkgList;
+                        return packname[0];
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

@@ -18,7 +18,7 @@ import java.util.TimerTask;
  */
 public class TimingService extends Service {
     // 两次检测的时间间隔 单位分钟
-    public static double checkTime = 0.1;
+    public static double checkTime = 10;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -51,15 +51,16 @@ public class TimingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (AsiApplication.appTimer == null) {
-            AsiApplication.appTimer = new Timer();
-            AsiApplication.appTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    asyncTask();
-                }
-            }, 1000, (long) (checkTime * 60 * 1000));
+        if (AsiApplication.appTimer != null) {
+            AsiApplication.appTimer.cancel();
         }
+        AsiApplication.appTimer = new Timer();
+        AsiApplication.appTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                asyncTask();
+            }
+        }, 1000, (long) (checkTime * 60 * 1000));
         return START_STICKY;
     }
 
@@ -94,17 +95,18 @@ public class TimingService extends Service {
      */
     protected void asyncTask() {
 
-        Log.e("TimingService", "签到服务在后台运行 " + System.currentTimeMillis());
-
         int state = SignInUtil.computationsTime(this);
-        if (state == 1) {
+
+        Log.e("TimingService", "签到服务在后台运行:" + state);
+
+        if (state == 1 && !ConfigUtil.getBoolean(this, SignInUtil.mKey())) {
             AsiApplication.run(new Runnable() {
                 @Override
                 public void run() {
                     SignInUtil.doMorning(AsiApplication.getContext());
                 }
             });
-        } else if (state == 2) {
+        } else if (state == 2 && !ConfigUtil.getBoolean(this, SignInUtil.eKey())) {
             AsiApplication.run(new Runnable() {
                 @Override
                 public void run() {
