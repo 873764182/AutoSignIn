@@ -24,6 +24,10 @@ public class AsiApplication extends Application {
         appHandler.post(runnable);
     }
 
+    public static void run(Runnable runnable, long delayMillis) {
+        appHandler.postDelayed(runnable, delayMillis);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

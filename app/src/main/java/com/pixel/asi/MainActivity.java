@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.util.Calendar;
 
@@ -91,6 +92,13 @@ public class MainActivity extends AppCompatActivity {
         String AFTER_TIME = ConfigUtil.getString(this, SignInUtil.AFTER_TIME);
         if (AFTER_TIME != null && AFTER_TIME.length() > 0) {
             mAfterTime.setText(AFTER_TIME);
+        }
+
+        try {
+            AppUtil.execShellCmd("input text  'Get ROOT permission to succeed'");
+            Toast.makeText(this, "程序必须拥有ROOT权限", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

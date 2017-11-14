@@ -11,8 +11,11 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -103,7 +106,7 @@ public class AppUtil {
             // 设置ComponentName参数1:packagename参数2:MainActivity路径
             ComponentName cn = new ComponentName(pn, className);
             intent.setComponent(cn);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             context.startActivity(intent);
         }
     }
@@ -126,11 +129,13 @@ public class AppUtil {
     /**
      * 获取当前正在连接的WIFI名称(SSID)
      * SSID: LX, BSSID: dc:fe:18:f3:d7:1f, MAC: 02:00:00:00:00:00, Supplicant state: COMPLETED, RSSI: -35, Link speed: 72Mbps, Frequency: 2462MHz, Net ID: 0, Metered hint: false, score: 60
-     *
      * @return SSID
      */
     public static String getWifiName(Context context) {
         WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager == null) {
+            return null;
+        }
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         return wifiInfo.getSSID();
     }
@@ -175,6 +180,45 @@ public class AppUtil {
             Log.e("AppUtil", "run", ex);
         }
         return result.toString();
+    }
+
+    /**
+     * 执行屏幕点击 (没有ROOT权限无效)
+     */
+    public static void screenClick(final int x, final int y) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String[] order = {  // 利用ProcessBuilder执行shell命令
+                            "input",
+                            "tap",
+                            String.valueOf(x),
+                            String.valueOf(y)
+                    };
+                    Process process = new ProcessBuilder(order).start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * 执行 shell 脚本
+     *
+     * @param cmd 脚本
+     */
+    public static void execShellCmd(String cmd) throws IOException {
+        // 申请获取root权限，这一步很重要，不然会没有作用
+        Process process = Runtime.getRuntime().exec("su");
+        // 获取输出流
+        OutputStream outputStream = process.getOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+        dataOutputStream.writeBytes(cmd);   // 写入指令
+        dataOutputStream.flush();
+        dataOutputStream.close();
+        outputStream.close();
     }
 
 }

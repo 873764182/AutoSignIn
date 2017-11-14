@@ -32,7 +32,9 @@ public class SIAncillaryService extends AccessibilityService {
                 eventTypeName = "文本类型观点有所改变";
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:  // 类型窗口状态改变
-                eventTypeName = "类型窗口状态改变"; // TODO 每次
+                eventTypeName = "类型窗口状态改变 主要是Activity的改变"; // TODO 每次 event.getClassName() 会拿到Activity的名称
+
+                SignInUtil.punch(this, event);
                 break;
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:    // 式通知状态改变
                 eventTypeName = "式通知状态改变";
@@ -59,19 +61,17 @@ public class SIAncillaryService extends AccessibilityService {
                 eventTypeName = "文本发生了改变";
                 break;
             case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:    // 窗口内容发生了改变
-                eventTypeName = "窗口内容发生了改变";    // TODO 每次
-
-                SignInUtil.signEvening(event);
+                eventTypeName = "窗口内容发生了改变 主要是View控件的改变";    // TODO 每次event.getClassName() 会拿到View的名称
                 break;
             default:
                 eventTypeName = "没有匹配事件";
         }
-        Log.e("SIAncillaryService", "eventType:" + eventType + "\t" + "eventTypeName:" + eventTypeName);
+        Log.e("SIAncillaryService", "eventType:" + eventType + "\t" + "eventTypeName:" + eventTypeName + "\nClassName:" + event.getClassName());
     }
 
     @Override
     public void onInterrupt() {
-        Log.e("SIAncillaryService", "回调 onInterrupt");
+        Log.e("SIAncillaryService", "当前辅助服务被系统中断");
     }
 
 }
